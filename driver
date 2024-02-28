@@ -8,37 +8,33 @@ usage() {
 	echo "Usage: $0 [-h] <subcommand> [options]"
 	echo ""
 	echo "Subcommands:"
-	echo "  init 		- Starts Hadoop cluster "
-	echo "  deinit 		- Stops Hadoop cluster"
-	echo "  runjob 		- Runs MapReduce job"
+	echo "  start - Starts Hadoop cluster "
+	echo "  stop - Stops Hadoop cluster"
+	echo "  runjob - Runs MapReduce job"
 	echo ""
 	echo "Options:"
 	echo "  -h, --help   Display this help message"
 	exit 1
 }
 
-do_init() {
+do_start() {
 	$HADOOP_DIR/sbin/start-dfs.sh
 	$HADOOP_DIR/sbin/start-yarn.sh
 }
 
-do_deinit() {
+do_stop() {
 	$HADOOP_DIR/sbin/stop-dfs.sh
 	$HADOOP_DIR/sbin/stop-yarn.sh
 }
 
 do_runjob() {
-	shift
-	if [[ -z "$1" ]]; then num_workers=3; else num_workers="$1"; fi
-	echo "Running job with $num_workers workers..."
 	timestamp=$(date +%s)
 	{ time $HADOOP_DIR/bin/yarn jar $HADOOP_DIR/share/hadoop/tools/lib/hadoop-streaming-3.3.6.jar \
 		-files $PROJECT_DIR/mapper.py,$PROJECT_DIR/reducer.py \
 		-mapper "python3 mapper.py" \
 		-reducer "python3 reducer.py" \
 		-input $HDFS_BASEDIR/corpus-webis-tldr-17.json \
-		-output $HDFS_BASEDIR/mapred-output-$timestamp \
-		-nmworkers $num_workers ;
+		-output $HDFS_BASEDIR/mapred-output-$timestamp ;
 	} 2>&1 | tee job-output-$timestamp.log
 }
 
@@ -50,13 +46,13 @@ main() {
 
     # Parse subcommands
     case "$1" in
-	    init)
+	    start)
 		    shift
-		    do_init "$@"
+		    do_start "$@"
 		    ;;
-	    deinit)
+	    stop)
 		    shift
-		    do_deinit "$@"
+		    do_stop "$@"
 		    ;;
 
 	    runjob)
