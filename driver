@@ -1,0 +1,69 @@
+#!/bin/bash
+
+HADOOP_DIR=/home/ubuntu/hadoop-3.3.6
+PROJECT_DIR=/home/ubuntu/DE1-Project
+HDFS_BASEDIR=/user/ubuntu
+
+usage() {
+	echo "Usage: $0 [-h] <subcommand> [options]"
+	echo ""
+	echo "Subcommands:"
+	echo "  init 		- Starts Hadoop cluster "
+	echo "  deinit 		- Stops Hadoop cluster"
+	echo "  runjob 		- Runs MapReduce job"
+	echo ""
+	echo "Options:"
+	echo "  -h, --help   Display this help message"
+	exit 1
+}
+
+do_init() {
+	$HADOOP_DIR/sbin/start-dfs.sh
+	$HADOOP_DIR/sbin/start-yarn.sh
+}
+
+do_deinit() {
+	$HADOOP_DIR/sbin/stop-dfs.sh
+	$HADOOP_DIR/sbin/stop-yarn.sh
+}
+
+do_runjob() {
+	timestamp=$(date +%s)
+	{ time $HADOOP_DIR/bin/hadoop jar $HADOOP_DIR/share/hadoop/tools/lib/hadoop-streaming-3.3.6.jar \
+		-files $PROJECT_DIR/mapper.py,$PROJECT_DIR/reducer.py \
+		-mapper "python3 mapper.py" \
+		-reducer "python3 reducer.py" \
+		-input $HDFS_BASEDIR/corpus-webis-tldr-17.json \
+		-output $HDFS_BASEDIR/mapred-output-$timestamp ;
+	} 2>&1 | tee job-output-$timestamp.log
+}
+
+main() {
+	# Check if no arguments provided or help option requested
+	if [[ $# -eq 0 ]] || [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+		usage
+	fi
+
+    # Parse subcommands
+    case "$1" in
+	    init)
+		    shift
+		    do_init "$@"
+		    ;;
+	    deinit)
+		    shift
+		    do_deinit "$@"
+		    ;;
+
+	    runjob)
+		    shift
+		    do_runjob "$@"
+		    ;;
+	    *)
+		    echo "Error: Unknown subcommand '$1'"
+		    usage
+		    ;;
+    esac
+}
+
+main "$@"
