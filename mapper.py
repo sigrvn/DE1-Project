@@ -21,7 +21,7 @@ def main():
             continue
 
         words = re.findall(r'\b\w+\b', content.lower())
-        if 'the' in words:
+        if 'sweden' in words:
             print(f"{subreddit}\t1")
 
 if __name__ == '__main__':
