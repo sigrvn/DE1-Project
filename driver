@@ -29,12 +29,9 @@ do_stop() {
 
 do_runjob() {
 	timestamp=$(date +%s)
-	{ time $HADOOP_DIR/bin/yarn jar $HADOOP_DIR/share/hadoop/tools/lib/hadoop-streaming-3.3.6.jar \
-		-files $PROJECT_DIR/mapper.py,$PROJECT_DIR/reducer.py \
-		-mapper "python3 mapper.py" \
-		-reducer "python3 reducer.py" \
-		-input $HDFS_BASEDIR/corpus-webis-tldr-17.json \
-		-output $HDFS_BASEDIR/mapred-output-$timestamp ;
+	{ time $HADOOP_DIR/bin/yarn jar $PROJECT_DIR/subredditcount.jar SubredditCount \
+		$HDFS_BASEDIR/corpus-webis-tldr-17.json \
+		$HDFS_BASEDIR/mapred-output-$timestamp ;
 	} 2>&1 | tee job-output-$timestamp.log
 }
 
