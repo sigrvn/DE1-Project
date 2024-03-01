@@ -29,7 +29,6 @@ limitations under the License. See accompanying LICENSE file.
 		<name>mapreduce.jobhistory.address</name>
 		<value>de-i-5-master:10020</value>
 	</property>
-
 	<property>
 		<name>yarn.app.mapreduce.am.env</name>
 		<value>HADOOP_MAPRED_HOME=/home/ubuntu/hadoop-3.3.6</value>
@@ -43,40 +42,49 @@ limitations under the License. See accompanying LICENSE file.
 		<value>HADOOP_MAPRED_HOME=/home/ubuntu/hadoop-3.3.6</value>
 	</property>
 
+	<!-- Resource settings -->
+	<property>
+		<name>mapreduce.map.cpu.vcores</name>
+		<value>1</value>>
+	</property>>
+	<property>
+		<name>mapreduce.reduce.cpu.vcores</name>
+		<value>1</value>>
+	</property>
+
 	<property>
 		<name>mapreduce.map.memory.mb</name>
-		<value>1536</value>
-	</property>
-	<property>
-		<name>mapreduce.map.java.opts</name>
-		<value>-Xmx1024M</value>
+		<value>2048</value>
 	</property>
 	<property>
 		<name>mapreduce.reduce.memory.mb</name>
-		<value>3072</value>
+		<value>4096</value>
+	</property>
+	<property>
+		<name>mapreduce.map.java.opts</name>
+		<value>-Xmx1638m</value>
 	</property>
 	<property>
 		<name>mapreduce.reduce.java.opts</name>
-		<value>-Xmx2560M</value>
+		<value>-Xmx3278m</value>
 	</property>
+
 	<property>
 		<name>mapreduce.task.io.sort.mb</name>
 		<value>512</value>
 	</property>
 	<property>
 		<name>mapreduce.task.io.sort.factor</name>
-		<value>100</value>
+		<value>10</value>
+	</property>
+
+	<!-- JVM settings -->
+	<property>
+		<name>mapreduce.job.jvm.numtasks</name>
+		<value>-1</value> <!-- Number of tasks executed per JVM (-1 for unlimited) -->
 	</property>
 	<property>
-		<name>mapreduce.reduce.shuffle.parallelcopies</name>
-		<value>50</value>
-	</property>
-	<property>
-		<name>mapreduce.map.cpu.vcores</name>>
-		<value>2</value>>
-	</property>>
-	<property>
-		<name>mapreduce.reduce.cpu.vcores</name>>
-		<value>2</value>>
+		<name>mapreduce.tasktracker.tasks.sleeptime-before-sigkill</name>
+		<value>10000</value> <!-- Time to sleep before SIGKILL is sent to a task JVM -->
 	</property>
 </configuration>

@@ -8,6 +8,7 @@ usage() {
 	echo "Usage: $0 [-h] <subcommand> [options]"
 	echo ""
 	echo "Subcommands:"
+	echo "  build - Builds Jar file for MapReduce jobs"
 	echo "  start - Starts Hadoop cluster "
 	echo "  stop - Stops Hadoop cluster"
 	echo "  runjob - Runs MapReduce job"
@@ -15,6 +16,11 @@ usage() {
 	echo "Options:"
 	echo "  -h, --help   Display this help message"
 	exit 1
+}
+
+do_build() {
+	javac -cp `$HADOOP_DIR/bin/hadoop classpath` SubredditCount.java
+	jar -cvf subredditcount.jar *SubredditCount*.class
 }
 
 do_start() {
@@ -29,10 +35,22 @@ do_stop() {
 
 do_runjob() {
 	timestamp=$(date +%s)
+	input=$HDFS_BASEDIR/corpus-webis-tldr-17.json
+	temp_dir=$HDFS_BASEDIR/mapred-TEMP-output
+	output_dir=$HDFS_BASEDIR/mapred-output-$timestamp
+
+	# Run job and collect logs & timing
 	{ time $HADOOP_DIR/bin/yarn jar $PROJECT_DIR/subredditcount.jar SubredditCount \
-		$HDFS_BASEDIR/corpus-webis-tldr-17.json \
-		$HDFS_BASEDIR/mapred-output-$timestamp ;
+		$input $temp_dir $output_dir;
 	} 2>&1 | tee job-output-$timestamp.log
+
+	# Remove temporary directory
+	$HADOOP_DIR/bin/hdfs dfs -rm -R $temp_dir
+
+	# Copy result from HDFS to local FS
+	$HADOOP_DIR/bin/hdfs dfs -get $output_dir/part-r-00000
+	mv part-r-00000 mapred-result-$timestamp
+	export MY_MAPRED_RESULT=mapred-result-$timestamp
 }
 
 main() {
@@ -43,6 +61,10 @@ main() {
 
     # Parse subcommands
     case "$1" in
+	    build)
+		    shift
+		    do_build "$@"
+		    ;;
 	    start)
 		    shift
 		    do_start "$@"
